@@ -17,6 +17,8 @@ services:
       - FLASK_ENV=development
       - FLASK_DEBUG=1
       - PYTHONUNBUFFERED=1
+    ports:
+      - "5000:5000"
     volumes:
       - ./PharmaVida-analitica:/app:delegated
       - /app/.venv
@@ -35,6 +37,8 @@ services:
       - DJANGO_DEBUG=True
       - PYTHONUNBUFFERED=1
       - DJANGO_SETTINGS_MODULE=config.settings
+    ports:
+      - "8888:8888"
     volumes:
       - ./orquestador_backend:/app:delegated
       - /app/.venv
@@ -51,6 +55,8 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=dev
       - LOGGING_LEVEL_ROOT=DEBUG
+    ports:
+      - "8080:8080"
     networks:
       - pharmavida-network
 
@@ -65,6 +71,8 @@ services:
     environment:
       - ENVIRONMENT=development
       - PYTHONUNBUFFERED=1
+    ports:
+      - "8000:8000"
     volumes:
       - ./pharmacy-products:/app:delegated
       - /app/.venv
