@@ -1,0 +1,333 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "API de Usuarios, Autenticación, Compras y Salud",
+    "version": "1.1.0",
+    "description": "Documentación de endpoints de usuario, autenticación, compras y estado de salud"
+  },
+  "paths": {
+    "/api/user/all": {
+      "get": {
+        "summary": "Obtener todos los usuarios (solo ADMIN)",
+        "tags": ["User"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Lista de usuarios",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/UserResponseDto" }
+                }
+              }
+            }
+          },
+          "401": { "description": "No autorizado" },
+          "403": { "description": "Prohibido" }
+        }
+      }
+    },
+    "/api/user/me": {
+      "get": {
+        "summary": "Obtener perfil propio (ADMIN o CLIENTE)",
+        "tags": ["User"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Perfil del usuario",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserResponseDto" }
+              }
+            }
+          },
+          "401": { "description": "No autorizado" },
+          "403": { "description": "Prohibido" }
+        }
+      },
+      "put": {
+        "summary": "Actualizar perfil propio (ADMIN o CLIENTE)",
+        "tags": ["User"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateUserDto" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Perfil actualizado",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserResponseDto" }
+              }
+            }
+          },
+          "400": { "description": "Datos inválidos" },
+          "401": { "description": "No autorizado" },
+          "403": { "description": "Prohibido" }
+        }
+      },
+      "delete": {
+        "summary": "Eliminar cuenta propia (solo CLIENTE)",
+        "tags": ["User"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "204": { "description": "Cuenta eliminada" },
+          "401": { "description": "No autorizado" },
+          "403": { "description": "Prohibido" }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "Login de usuario",
+        "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LoginRequestDto" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Usuario autenticado",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/LoginResponseDto" }
+              }
+            }
+          },
+          "401": { "description": "Credenciales inválidas" }
+        }
+      }
+    },
+    "/api/auth/register": {
+      "post": {
+        "summary": "Registro de usuario",
+        "tags": ["Auth"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/RegisterRequestDto" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Usuario registrado",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/RegisterResponseDto" }
+              }
+            }
+          },
+          "400": { "description": "Datos inválidos" }
+        }
+      }
+    },
+    "/api/compras": {
+      "post": {
+        "summary": "Registrar una compra (CLIENTE o ADMIN)",
+        "tags": ["Compras"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CompraRequestDto" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Compra registrada",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CompraResponseDto" }
+              }
+            }
+          },
+          "400": { "description": "Datos inválidos" },
+          "401": { "description": "No autorizado" }
+        }
+      }
+    },
+    "/api/compras/me": {
+      "get": {
+        "summary": "Obtener compras propias (CLIENTE o ADMIN)",
+        "tags": ["Compras"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Lista de compras del usuario autenticado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/CompraResponseDto" }
+                }
+              }
+            }
+          },
+          "401": { "description": "No autorizado" }
+        }
+      }
+    },
+    "/api/compras/all": {
+      "get": {
+        "summary": "Obtener todas las compras (solo ADMIN)",
+        "tags": ["Compras"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Lista de todas las compras",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/CompraResponseDto" }
+                }
+              }
+            }
+          },
+          "401": { "description": "No autorizado" },
+          "403": { "description": "Prohibido" }
+        }
+      }
+    },
+    "/echo": {
+      "get": {
+        "summary": "Echo - Estado de salud del servidor",
+        "tags": ["Health"],
+        "responses": {
+          "200": {
+            "description": "Respuesta con mensaje de salud",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "¡Hola! El servidor está funcionando correctamente"
+                    },
+                    "timestamp": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2025-09-30T19:50:37"
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "UP"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "UserResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 123 },
+          "username": { "type": "string", "example": "usuario1" },
+          "email": { "type": "string", "example": "mail@ejemplo.com" },
+          "roles": {
+            "type": "array",
+            "items": { "type": "string", "example": "CLIENTE" }
+          }
+        }
+      },
+      "UpdateUserDto": {
+        "type": "object",
+        "properties": {
+          "username": { "type": "string", "example": "nuevoUsuario" },
+          "email": { "type": "string", "example": "nuevo@ejemplo.com" }
+        }
+      },
+      "LoginRequestDto": {
+        "type": "object",
+        "properties": {
+          "username": { "type": "string", "example": "usuario1" },
+          "password": { "type": "string", "example": "********" }
+        },
+        "required": ["username", "password"]
+      },
+      "LoginResponseDto": {
+        "type": "object",
+        "properties": {
+          "token": { "type": "string", "example": "jwt-token" },
+          "user": { "$ref": "#/components/schemas/UserResponseDto" }
+        }
+      },
+      "RegisterRequestDto": {
+        "type": "object",
+        "properties": {
+          "username": { "type": "string", "example": "usuario2" },
+          "email": { "type": "string", "example": "correo@ejemplo.com" },
+          "password": { "type": "string", "example": "********" }
+        },
+        "required": ["username", "email", "password"]
+      },
+      "RegisterResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 124 },
+          "username": { "type": "string", "example": "usuario2" },
+          "email": { "type": "string", "example": "correo@ejemplo.com" }
+        }
+      },
+      "CompraRequestDto": {
+        "type": "object",
+        "properties": {
+          "usuarioId": { "type": "integer", "example": 1 },
+          "productos": {
+            "type": "array",
+            "items": { "type": "integer", "example": 2 }
+          },
+          "cantidades": {
+            "type": "array",
+            "items": { "type": "integer", "example": 3 }
+          }
+        },
+        "required": ["usuarioId", "productos", "cantidades"]
+      },
+      "CompraResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "example": 101 },
+          "fechaCompra": { "type": "string", "format": "date-time", "example": "2025-09-30T19:50:37" },
+          "usuarioId": { "type": "integer", "example": 1 },
+          "productos": {
+            "type": "array",
+            "items": { "type": "integer", "example": 2 }
+          },
+          "cantidades": {
+            "type": "array",
+            "items": { "type": "integer", "example": 3 }
+          }
+        }
+      }
+    }
+  }
+}

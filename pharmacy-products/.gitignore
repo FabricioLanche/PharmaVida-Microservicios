@@ -1,0 +1,43 @@
+# --- Archivos y carpetas de Python ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+*.egg
+*.egg-info/
+*.eggs/
+.Python
+.env
+*.db
+
+# --- Entornos virtuales ---
+.venv/
+venv/
+env/
+
+# --- Archivos temporales ---
+*.log
+*.pot
+*.py[cod]
+*$py.class
+
+# --- Configuración IDEs / editores ---
+.vscode/
+.idea/
+*.swp
+
+# --- Archivos de Docker ---
+# (Los contenedores generan volúmenes, no los subas)
+mysql_data/
+data/
+
+# --- Archivos del sistema operativo ---
+.DS_Store
+Thumbs.db
+
+# --- Archivos de pruebas ---
+.coverage
+.pytest_cache/
+htmlcov/
+.cache/

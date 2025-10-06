@@ -1,0 +1,80 @@
+version: '3.8'
+
+# ==========================================
+# 🔧 Docker Compose para DESARROLLO
+# ==========================================
+# Este archivo extiende el docker-compose.yml base
+# y agrega configuraciones específicas para desarrollo:
+# - Volúmenes para hot reload
+# - Logs más verbosos
+# - Debugging habilitado
+# 
+# Uso: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  # ==========================================
+  # 📊 Analytics API - Configuración Dev
+  # ==========================================
+  analytics-api:
+    command: python main.py
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./PharmaVida-analitica:/app:delegated
+      - /app/.venv  # Excluir venv del volumen
+
+  # ==========================================
+  # 🎯 Orquestador API - Configuración Dev
+  # ==========================================
+  orquestador-api:
+    command: python manage.py runserver 0.0.0.0:8888
+    environment:
+      - DJANGO_DEBUG=True
+      - PYTHONUNBUFFERED=1
+      - DJANGO_SETTINGS_MODULE=config.settings
+    volumes:
+      - ./orquestador_backend:/app:delegated
+      - /app/.venv  # Excluir venv del volumen
+
+  # ==========================================
+  # 👥 Usuarios API - Configuración Dev
+  # ==========================================
+  usuarios-api:
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - LOGGING_LEVEL_ROOT=DEBUG
+    # En Spring Boot, para hot reload en desarrollo
+    # considera usar spring-boot-devtools en tu pom.xml
+
+  # ==========================================
+  # 🏪 Productos API - Configuración Dev
+  # ==========================================
+  productos-api:
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload --log-level debug
+    environment:
+      - ENVIRONMENT=development
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./pharmacy-products:/app:delegated
+      - /app/.venv  # Excluir venv del volumen
+
+  # ==========================================
+  # 📝 Recetas API - Configuración Dev
+  # ==========================================
+  recetas-api:
+    command: node --inspect=0.0.0.0:9229 src/app.js
+    environment:
+      - NODE_ENV=development
+      - DEBUG=*
+    ports:
+      - "9229:9229"  # Puerto para debugging con Node Inspector
+    volumes:
+      - ./recetas_cloud/src:/usr/src/app/src:delegated
+      - /usr/src/app/node_modules  # Excluir node_modules del volumen
+
+networks:
+  pharmavida-network:
+    driver: bridge
+    name: pharmavida-network
