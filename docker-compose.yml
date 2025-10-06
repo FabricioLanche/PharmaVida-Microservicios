@@ -78,12 +78,12 @@ services:
     build:
       context: ./recetas_cloud
       dockerfile: Dockerfile
-    command: node --inspect=0.0.0.0:9229 src/app.js
+    command: node --inspect=0.0.0.0:3000 src/app.js
     environment:
       - NODE_ENV=development
       - DEBUG=*
     ports:
-      - "9229:9229"
+      - "3000:3000"
     volumes:
       - ./recetas_cloud/src:/usr/src/app/src:delegated
       - /usr/src/app/node_modules
