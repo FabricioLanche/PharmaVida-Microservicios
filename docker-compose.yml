@@ -1,104 +1,75 @@
 version: '3.8'
 
-# ==========================================
-# 🔧 Docker Compose para DESARROLLO
-# ==========================================
-
 services:
-  # ==========================================
-  # 📊 Analytics API - Configuración Dev
-  # ==========================================
-  analytics-api:
-    build:
-      context: ./PharmaVida-analitica
-      dockerfile: Dockerfile
-    command: python main.py
-    environment:
-      - FLASK_ENV=development
-      - FLASK_DEBUG=1
-      - PYTHONUNBUFFERED=1
-    ports:
-      - "5000:5000"
-    volumes:
-      - ./PharmaVida-analitica:/app:delegated
-      - /app/.venv
-    networks:
-      - pharmavida-network
-
-  # ==========================================
-  # 🎯 Orquestador API - Configuración Dev
-  # ==========================================
-  orquestador-api:
-    build:
-      context: ./orquestador_backend
-      dockerfile: Dockerfile
-    command: python manage.py runserver 0.0.0.0:8888
-    environment:
-      - DJANGO_DEBUG=True
-      - PYTHONUNBUFFERED=1
-      - DJANGO_SETTINGS_MODULE=config.settings
-    ports:
-      - "8888:8888"
-    volumes:
-      - ./orquestador_backend:/app:delegated
-      - /app/.venv
-    networks:
-      - pharmavida-network
-
-  # ==========================================
-  # 👥 Usuarios API - Configuración Dev
-  # ==========================================
-  usuarios-api:
-    build:
-      context: ./farmacy
-      dockerfile: Dockerfile
-    environment:
-      - SPRING_PROFILES_ACTIVE=dev
-      - LOGGING_LEVEL_ROOT=DEBUG
-    ports:
-      - "8080:8080"
-    networks:
-      - pharmavida-network
-
-  # ==========================================
-  # 🏪 Productos API - Configuración Dev
-  # ==========================================
+  # ============================================
+  # FastAPI Backend - Productos y Ofertas
+  # ============================================
   productos-api:
     build:
-      context: ./pharmacy-products
+      context: ./PharmaVida-Productos
       dockerfile: Dockerfile
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload --log-level debug
-    environment:
-      - ENVIRONMENT=development
-      - PYTHONUNBUFFERED=1
+    image: pharmavida_productos:latest
+    container_name: pharmavida_productos
+    env_file:
+      - .env
     ports:
       - "8000:8000"
+    restart: unless-stopped
     volumes:
-      - ./pharmacy-products:/app:delegated
-      - /app/.venv
-    networks:
-      - pharmavida-network
+      - ./PharmaVida-Productos:/app
+    environment:
+      - PYTHONPATH=/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/echo"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
-  # ==========================================
-  # 📝 Recetas API - Configuración Dev
-  # ==========================================
+  # ============================================
+  # Spring Boot Backend - Usuarios y Compras
+  # ============================================
+  usuarios-api:
+    build:
+      context: ./PharmaVida-Usuarios
+      dockerfile: Dockerfile
+    image: pharmavida_usuarios:latest
+    container_name: pharmavida_usuarios
+    env_file:
+      - .env
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    environment:
+      - JAVA_OPTS=-Xmx512m -Xms256m
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ============================================
+  # Node.js/Express Backend - Recetas y Médicos
+  # ============================================
   recetas-api:
     build:
-      context: ./recetas_cloud
+      context: ./PharmaVida-Recetas
       dockerfile: Dockerfile
-    command: node --inspect=0.0.0.0:3000 src/app.js
-    environment:
-      - NODE_ENV=development
-      - DEBUG=*
+    image: pharmavida_recetas:latest
+    container_name: pharmavida_recetas
+    env_file:
+      - .env
     ports:
       - "3000:3000"
+    restart: unless-stopped
     volumes:
-      - ./recetas_cloud/src:/usr/src/app/src:delegated
-      - /usr/src/app/node_modules
-    networks:
-      - pharmavida-network
-
-networks:
-  pharmavida-network:
-    driver: bridge
-    name: pharmavida-network
+      - ~/.aws:/home/nodejs/.aws:ro
+    environment:
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/echo"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

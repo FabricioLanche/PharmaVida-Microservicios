@@ -1,69 +1,31 @@
-# ==========================================
-# 🔒 Archivos sensibles
-# ==========================================
-**/.env
-**/.env.*
-!**/.env.example
+# Environment variables
+.env
+.env.local
+.env.*.local
 
-# Credenciales AWS
-**/aws-credentials
-**/*credentials*.json
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
 
-# ==========================================
-# 🐍 Python (Flask, Django, FastAPI)
-# ==========================================
-**/__pycache__/
-**/*.py[cod]
-**/*$py.class
-**/.venv/
-**/venv/
-**/ENV/
-**/env/
-**/.Python
-**/pip-log.txt
-**/pip-delete-this-directory.txt
-**/*.egg-info/
-**/dist/
-**/build/
+# Dependencies
+node_modules/
+__pycache__/
+*.pyc
+target/
+mvn/
 
-# ==========================================
-# ☕ Java (Spring Boot)
-# ==========================================
-**/target/
-**/.idea/
-**/*.iml
-**/.mvn/
-**/mvnw
-**/mvnw.cmd
-**/.classpath
-**/.project
-**/.settings/
+# Logs
+logs/
+*.log
+npm-debug.log*
 
-# ==========================================
-# 🟢 Node.js (Express)
-# ==========================================
-**/node_modules/
-**/npm-debug.log*
-**/yarn-debug.log*
-**/yarn-error.log*
-**/.npm
+# Docker
+docker-compose.override.yml
 
-# ==========================================
-# 🐳 Docker
-# ==========================================
-**/.dockerignore
-
-# ==========================================
-# 💻 IDEs y Editores
-# ==========================================
-**/.vscode/
-**/.DS_Store
-**/*.swp
-**/*.swo
-**/*~
-
-# ==========================================
-# 📊 Logs
-# ==========================================
-**/*.log
-**/logs/
+# OS
+.DS_Store
+Thumbs.db
