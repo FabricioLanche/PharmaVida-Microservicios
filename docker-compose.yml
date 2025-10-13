@@ -19,12 +19,6 @@ services:
       - ./PharmaVida-Productos:/app
     environment:
       - PYTHONPATH=/app
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/echo"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
 
   # ============================================
   # Spring Boot Backend - Usuarios y Compras
@@ -42,12 +36,6 @@ services:
     restart: unless-stopped
     environment:
       - JAVA_OPTS=-Xmx512m -Xms256m
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
 
   # ============================================
   # Node.js/Express Backend - Recetas y Médicos
@@ -67,9 +55,3 @@ services:
       - ~/.aws:/home/nodejs/.aws:ro
     environment:
       - NODE_ENV=production
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/echo"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
