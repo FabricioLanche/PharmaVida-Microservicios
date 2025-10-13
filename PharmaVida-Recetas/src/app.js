@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const morgan = require('morgan');
 const dbConfig = require('./config/dbConfig');
 const medicosController = require('./controllers/medicosController');
 const swaggerUi = require('swagger-ui-express');
@@ -15,6 +16,9 @@ const PORT = 3000;
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// 🟢 Activar logs HTTP en consola
+app.use(morgan('dev'));
 
 // Database connection
 console.log('[APP] dbConfig.url =', dbConfig.url);
