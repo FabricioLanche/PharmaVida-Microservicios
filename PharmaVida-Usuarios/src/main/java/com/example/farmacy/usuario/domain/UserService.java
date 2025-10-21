@@ -94,9 +94,9 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteAccount(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado con email: " + email));
+    public void deleteAccount(String dni) {
+        User user = userRepository.findByDni(dni)
+                .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado con email: " + dni));
 
         userRepository.delete(user);
     }
