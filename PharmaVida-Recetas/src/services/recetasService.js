@@ -116,7 +116,10 @@ const recetasService = {
                 ContentType: req.file.mimetype,
             };
             await s3.upload(params).promise();
-            const archivoPDF = fileName;
+            
+            // Construir URL completa del PDF
+            const region = process.env.AWS_REGION || 'us-east-1';
+            const archivoPDF = `https://${bucket}.s3.${region}.amazonaws.com/${fileName}`;
 
             // Extraer campos desde el PDF usando Textract
             const { pacienteDNI, medicoCMP, fechaEmision, productos } = await extraerCamposDesdePDF(req.file.buffer, textract);
@@ -245,7 +248,11 @@ const recetasService = {
                 return res.status(400).json({ error: 'No hay archivo para eliminar' });
             }
 
-            const key = receta.archivoPDF;
+            // Extraer la clave del archivo desde la URL
+            const key = receta.archivoPDF.includes('amazonaws.com/') 
+                ? receta.archivoPDF.split('amazonaws.com/')[1]
+                : receta.archivoPDF;
+                
             const bucket = process.env.AWS_S3_BUCKET || process.env.BUCKET_NAME;
             if (!bucket) {
                 return res.status(500).json({ error: 'Falta configuración del bucket S3' });
@@ -253,16 +260,15 @@ const recetasService = {
             const params = { Bucket: bucket, Key: key };
             await s3.deleteObject(params).promise();
 
-            // Quitar referencia en MongoDB evitando validación del campo requerido
-            const recetaActualizada = await Receta.findByIdAndUpdate(
-                recetaId,
-                { $unset: { archivoPDF: "" } },
-                { new: true, runValidators: false }
-            );
+            // Eliminar el registro completo de la base de datos
+            await Receta.findByIdAndDelete(recetaId);
 
-            res.json({ mensaje: 'Archivo eliminado correctamente', receta: recetaActualizada });
+            res.json({ 
+                mensaje: 'Receta y archivo eliminados exitosamente',
+                id: recetaId
+            });
         } catch (error) {
-            res.status(500).json({ error: 'Error al eliminar el archivo', detalle: error.message });
+            res.status(500).json({ error: 'Error al eliminar la receta', detalle: error.message });
         }
     },
 
