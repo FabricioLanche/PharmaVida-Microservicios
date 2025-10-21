@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const morgan = require('morgan');
+const cors = require('cors');
 const dbConfig = require('./config/dbConfig');
 const medicosController = require('./controllers/medicosController');
 const swaggerUi = require('swagger-ui-express');
@@ -12,6 +13,9 @@ const Medico = require('./models/medicosModel');
 
 const app = express();
 const PORT = 3000;
+
+// CORS - Permitir todas las solicitudes
+app.use(cors());
 
 // Middleware
 app.use(express.json());
