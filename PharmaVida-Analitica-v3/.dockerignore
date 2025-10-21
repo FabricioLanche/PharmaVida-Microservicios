@@ -1,0 +1,17 @@
+# Evitar incluir credenciales y archivos personales en la imagen
+.env
+.aws
+.env.*
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+.DS_Store
+.git
+.gitignore
+.vscode
+.idea
+*.bak
+*.log

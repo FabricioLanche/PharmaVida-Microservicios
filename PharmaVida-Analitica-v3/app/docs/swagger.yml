@@ -1,0 +1,407 @@
+swagger: "2.0"
+info:
+  title: "PharmaVida Analítica API"
+  description: "API para análisis de datos de ventas, productos y usuarios de PharmaVida. Incluye endpoints para consultas analíticas e ingesta de datos desde múltiples fuentes (MySQL, PostgreSQL, MongoDB)."
+  version: "1.0.0"
+  contact:
+    name: "Equipo PharmaVida"
+    email: "soporte@pharmavida.com"
+
+basePath: "/api/analitica"
+schemes:
+  - http
+  - https
+
+tags:
+  - name: "Analytics"
+    description: "Endpoints de consultas analíticas sobre ventas, productos y usuarios"
+  - name: "Ingesta"
+    description: "Endpoints para ingesta de datos desde diferentes bases de datos"
+  - name: "Health"
+    description: "Endpoints de salud y estado del servicio"
+
+paths:
+  /ventas:
+    get:
+      tags:
+        - "Analytics"
+      summary: "Obtener ventas por día"
+      description: "Retorna un análisis de las ventas agrupadas por día, incluyendo el total de ventas y cantidad de transacciones"
+      produces:
+        - application/json
+      responses:
+        200:
+          description: "Lista de ventas por día"
+          schema:
+            type: object
+            properties:
+              ventas:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    fecha:
+                      type: string
+                      format: date
+                      example: "2025-01-15"
+                      description: "Fecha de las ventas"
+                    total_ventas:
+                      type: number
+                      format: float
+                      example: 1250.50
+                      description: "Monto total de ventas del día"
+                    cantidad_transacciones:
+                      type: integer
+                      example: 25
+                      description: "Número de transacciones realizadas"
+        500:
+          description: "Error del servidor"
+          schema:
+            $ref: "#/definitions/Error"
+
+  /top-productos:
+    get:
+      tags:
+        - "Analytics"
+      summary: "Obtener productos más vendidos"
+      description: "Retorna una lista de los productos con mayor volumen de ventas ordenados de mayor a menor"
+      produces:
+        - application/json
+      parameters:
+        - name: limit
+          in: query
+          description: "Número de productos a retornar"
+          required: false
+          type: integer
+          default: 10
+          minimum: 1
+          maximum: 100
+      responses:
+        200:
+          description: "Lista de productos más vendidos"
+          schema:
+            type: object
+            properties:
+              productos:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    producto_id:
+                      type: integer
+                      example: 101
+                      description: "ID único del producto"
+                    nombre:
+                      type: string
+                      example: "Paracetamol 500mg"
+                      description: "Nombre del producto"
+                    total_vendido:
+                      type: number
+                      format: float
+                      example: 5000.00
+                      description: "Monto total vendido del producto"
+                    unidades_vendidas:
+                      type: integer
+                      example: 150
+                      description: "Cantidad de unidades vendidas"
+        500:
+          description: "Error del servidor"
+          schema:
+            $ref: "#/definitions/Error"
+
+  /top-usuarios:
+    get:
+      tags:
+        - "Analytics"
+      summary: "Obtener usuarios con más compras"
+      description: "Retorna una lista de los usuarios que más han comprado, ordenados por monto total"
+      produces:
+        - application/json
+      parameters:
+        - name: limit
+          in: query
+          description: "Número de usuarios a retornar"
+          required: false
+          type: integer
+          default: 10
+          minimum: 1
+          maximum: 100
+      responses:
+        200:
+          description: "Lista de usuarios top"
+          schema:
+            type: object
+            properties:
+              usuarios:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    usuario_id:
+                      type: integer
+                      example: 42
+                      description: "ID único del usuario"
+                    nombre:
+                      type: string
+                      example: "Juan Pérez"
+                      description: "Nombre completo del usuario"
+                    email:
+                      type: string
+                      example: "juan.perez@email.com"
+                      description: "Email del usuario"
+                    total_compras:
+                      type: number
+                      format: float
+                      example: 2500.00
+                      description: "Monto total de compras realizadas"
+                    numero_ordenes:
+                      type: integer
+                      example: 15
+                      description: "Cantidad de órdenes realizadas"
+        500:
+          description: "Error del servidor"
+          schema:
+            $ref: "#/definitions/Error"
+
+  /productos-sin-venta:
+    get:
+      tags:
+        - "Analytics"
+      summary: "Obtener productos sin ventas"
+      description: "Retorna una lista de productos que no han registrado ventas en un período específico de días"
+      produces:
+        - application/json
+      parameters:
+        - name: dias
+          in: query
+          description: "Número de días a analizar hacia atrás desde hoy"
+          required: false
+          type: integer
+          default: 30
+          minimum: 1
+          maximum: 365
+      responses:
+        200:
+          description: "Lista de productos sin ventas"
+          schema:
+            type: object
+            properties:
+              productos:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    producto_id:
+                      type: integer
+                      example: 205
+                      description: "ID único del producto"
+                    nombre:
+                      type: string
+                      example: "Vitamina C 1000mg"
+                      description: "Nombre del producto"
+                    ultima_venta:
+                      type: string
+                      format: date
+                      example: "2024-11-15"
+                      description: "Fecha de la última venta registrada"
+                    stock_disponible:
+                      type: integer
+                      example: 50
+                      description: "Cantidad disponible en inventario"
+                    precio:
+                      type: number
+                      format: float
+                      example: 25.99
+                      description: "Precio unitario del producto"
+        500:
+          description: "Error del servidor"
+          schema:
+            $ref: "#/definitions/Error"
+
+  /ingesta-mysql:
+    post:
+      tags:
+        - "Ingesta"
+      summary: "Ingestar datos desde MySQL"
+      description: "Ejecuta el proceso de ingesta de datos desde la base de datos MySQL hacia el data warehouse (Athena). Este proceso extrae datos de ventas, productos y usuarios."
+      produces:
+        - application/json
+      responses:
+        200:
+          description: "Ingesta exitosa"
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "success"
+                description: "Estado de la operación"
+              registros_procesados:
+                type: integer
+                example: 1500
+                description: "Número de registros procesados exitosamente"
+              mensaje:
+                type: string
+                example: "Ingesta desde MySQL completada exitosamente"
+                description: "Mensaje descriptivo del resultado"
+              timestamp:
+                type: string
+                format: date-time
+                example: "2025-10-05T14:30:00Z"
+                description: "Fecha y hora de la ingesta"
+        500:
+          description: "Error en la ingesta"
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "error"
+              mensaje:
+                type: string
+                example: "Error al conectar con MySQL"
+              error_detalle:
+                type: string
+                example: "Connection timeout after 30 seconds"
+
+  /ingesta-postgresql:
+    post:
+      tags:
+        - "Ingesta"
+      summary: "Ingestar datos desde PostgreSQL"
+      description: "Ejecuta el proceso de ingesta de datos desde la base de datos PostgreSQL hacia el data warehouse (Athena). Incluye datos de inventario y transacciones."
+      produces:
+        - application/json
+      responses:
+        200:
+          description: "Ingesta exitosa"
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "success"
+              registros_procesados:
+                type: integer
+                example: 2300
+              mensaje:
+                type: string
+                example: "Ingesta desde PostgreSQL completada exitosamente"
+              timestamp:
+                type: string
+                format: date-time
+                example: "2025-10-05T14:35:00Z"
+        500:
+          description: "Error en la ingesta"
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "error"
+              mensaje:
+                type: string
+                example: "Error al conectar con PostgreSQL"
+              error_detalle:
+                type: string
+
+  /ingesta-mongodb:
+    post:
+      tags:
+        - "Ingesta"
+      summary: "Ingestar datos desde MongoDB"
+      description: "Ejecuta el proceso de ingesta de datos desde MongoDB hacia el data warehouse (Athena). Procesa documentos de logs, eventos y métricas de usuario."
+      produces:
+        - application/json
+      responses:
+        200:
+          description: "Ingesta exitosa"
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "success"
+              documentos_procesados:
+                type: integer
+                example: 850
+              mensaje:
+                type: string
+                example: "Ingesta desde MongoDB completada exitosamente"
+              timestamp:
+                type: string
+                format: date-time
+                example: "2025-10-05T14:40:00Z"
+        500:
+          description: "Error en la ingesta"
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "error"
+              mensaje:
+                type: string
+                example: "Error al conectar con MongoDB"
+              error_detalle:
+                type: string
+
+  /echo:
+    get:
+      tags:
+        - "Health"
+      summary: "Verificar estado del servicio"
+      description: "Endpoint de health check para verificar que el servicio está funcionando correctamente y puede conectarse a Athena"
+      produces:
+        - application/json
+      responses:
+        200:
+          description: "Servicio activo y funcionando"
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Conectado correctamente con Flask y Athena ✅"
+                description: "Mensaje de confirmación del estado del servicio"
+              timestamp:
+                type: string
+                format: date-time
+                example: "2025-10-05T14:45:00Z"
+              version:
+                type: string
+                example: "1.0.0"
+
+  /docs:
+    get:
+      tags:
+        - "Health"
+      summary: "Redirigir a documentación"
+      description: "Redirige automáticamente a la interfaz de Swagger UI"
+      produces:
+        - text/html
+      responses:
+        302:
+          description: "Redirección a /apidocs"
+
+definitions:
+  Error:
+    type: object
+    properties:
+      status:
+        type: string
+        example: "error"
+        description: "Estado de la respuesta"
+      mensaje:
+        type: string
+        example: "Ha ocurrido un error en el servidor"
+        description: "Mensaje descriptivo del error"
+      error_detalle:
+        type: string
+        example: "Database connection failed"
+        description: "Detalle técnico del error (opcional)"
+      timestamp:
+        type: string
+        format: date-time
+        example: "2025-10-05T14:50:00Z"
+        description: "Fecha y hora del error"
