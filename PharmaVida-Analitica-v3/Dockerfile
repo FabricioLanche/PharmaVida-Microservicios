@@ -6,6 +6,7 @@ WORKDIR /app
 # Instalar dependencias del sistema necesarias para Athena y compilación
 RUN apt-get update && apt-get install -y \
     gcc \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copiar requirements primero (para aprovechar cache de Docker)

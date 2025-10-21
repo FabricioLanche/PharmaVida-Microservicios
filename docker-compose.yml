@@ -13,7 +13,7 @@ services:
       context: ./PharmaVida-Productos
       dockerfile: Dockerfile
     image: pharmavida_productos:latest
-    container_name: pharmavida_productos
+    container_name: pharmavida-productos
     env_file:
       - .env
     ports:
@@ -34,7 +34,7 @@ services:
       context: ./PharmaVida-Usuarios
       dockerfile: Dockerfile
     image: pharmavida_usuarios:latest
-    container_name: pharmavida_usuarios
+    container_name: pharmavida-usuarios
     env_file:
       - .env
     ports:
@@ -53,7 +53,7 @@ services:
       context: ./PharmaVida-Recetas
       dockerfile: Dockerfile
     image: pharmavida_recetas:latest
-    container_name: pharmavida_recetas
+    container_name: pharmavida-recetas
     env_file:
       - .env
     ports:
@@ -74,7 +74,7 @@ services:
       context: ./PharmaVida-Analitica-v3
       dockerfile: Dockerfile
     image: pharmavida_analitica:latest
-    container_name: pharmavida_analitica
+    container_name: pharmavida-analitica
     env_file:
       - ./.env
     ports:
@@ -99,7 +99,7 @@ services:
       context: ./PharmaVida-Orquestador
       dockerfile: Dockerfile
     image: pharmavida_orquestador:latest
-    container_name: pharmavida_orquestador
+    container_name: pharmavida-orquestador
     env_file:
       - .env
     ports:
