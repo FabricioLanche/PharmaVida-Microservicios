@@ -1,5 +1,9 @@
 version: '3.8'
 
+networks:
+  pharmavida-network:
+    driver: bridge
+
 services:
   # ============================================
   # FastAPI Backend - Productos y Ofertas
@@ -19,6 +23,8 @@ services:
       - ./PharmaVida-Productos:/app
     environment:
       - PYTHONPATH=/app
+    networks:
+      - pharmavida-network
 
   # ============================================
   # Spring Boot Backend - Usuarios y Compras
@@ -36,6 +42,8 @@ services:
     restart: unless-stopped
     environment:
       - JAVA_OPTS=-Xmx512m -Xms256m
+    networks:
+      - pharmavida-network
 
   # ============================================
   # Node.js/Express Backend - Recetas y Médicos
@@ -55,6 +63,8 @@ services:
       - ~/.aws:/home/nodejs/.aws:ro
     environment:
       - NODE_ENV=production
+    networks:
+      - pharmavida-network
 
   # ============================================
   # Flask Backend - Analítica y Data Processing
@@ -78,3 +88,37 @@ services:
       - INGESTA_BASE_URL=${INGESTA_BASE_URL}
       - ATHENA_OUTPUT_LOCATION=${ATHENA_OUTPUT_LOCATION}
       - ATHENA_DATABASE=${ATHENA_DATABASE}
+    networks:
+      - pharmavida-network
+
+  # ============================================
+  # Django Backend - Orquestador de Microservicios
+  # ============================================
+  orquestador-api:
+    build:
+      context: ./PharmaVida-Orquestador
+      dockerfile: Dockerfile
+    image: pharmavida_orquestador:latest
+    container_name: pharmavida_orquestador
+    env_file:
+      - .env
+    ports:
+      - "8888:8888"
+    restart: unless-stopped
+    volumes:
+      - ./PharmaVida-Orquestador:/app
+    environment:
+      - PYTHONPATH=/app
+      - SECRET_KEY=${SECRET_KEY}
+      - DEBUG=${DEBUG}
+      - URL_USUARIOS_COMPRAS=${URL_USUARIOS_COMPRAS}
+      - URL_PRODUCTOS_OFERTAS=${URL_PRODUCTOS_OFERTAS}
+      - URL_RECETAS_MEDICOS=${URL_RECETAS_MEDICOS}
+      - URL_ANALITICA=${URL_ANALITICA}
+    networks:
+      - pharmavida-network
+    depends_on:
+      - productos-api
+      - usuarios-api
+      - recetas-api
+      - analitica-api
