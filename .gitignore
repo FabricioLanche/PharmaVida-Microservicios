@@ -29,3 +29,79 @@ docker-compose.override.yml
 # OS
 .DS_Store
 Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite3
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Java/Maven/Gradle
+target/
+.gradle/
+*.class
+*.jar
+!gradle-wrapper.jar
+
+# Environment variables (cada carpeta tiene su propio .env local, pero el .env raíz se incluye)
+# PharmaVida-*/.env
+# PharmaVida-*/.env.local
+
+# Docker
+*.dockerignore
+
+# AWS
+.aws/credentials
+.aws/config
+
+# Secrets
+*.pem
+*.key
+!*.pub
