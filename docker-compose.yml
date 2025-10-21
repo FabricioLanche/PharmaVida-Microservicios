@@ -55,3 +55,23 @@ services:
       - ~/.aws:/home/nodejs/.aws:ro
     environment:
       - NODE_ENV=production
+
+  # ============================================
+  # Flask Backend - Analítica y Data Processing
+  # ============================================
+  analitica-api:
+    build:
+      context: ./PharmaVida-Analitica-v3
+      dockerfile: Dockerfile
+    image: pharmavida_analitica:latest
+    container_name: pharmavida_analitica
+    env_file:
+      - .env
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
+    volumes:
+      - ./PharmaVida-Analitica-v3:/app
+      - ~/.aws:/root/.aws:ro
+    environment:
+      - PYTHONPATH=/app
