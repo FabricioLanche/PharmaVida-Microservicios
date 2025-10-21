@@ -152,26 +152,47 @@ const recetasService = {
     async validarRecetaPorId(req, res) {
         try {
             const recetaId = req.params.id;
+            console.log(`[VALIDAR] Iniciando validación para receta ID: ${recetaId}`);
 
             if (!recetaId.match(/^[0-9a-fA-F]{24}$/)) {
                 return res.status(400).json({ error: 'ID de receta inválido' });
             }
 
-            // Buscar la receta por id (reutilizando la lógica)
+            // Buscar la receta por id
             const receta = await Receta.findById(recetaId);
-            if (!receta) return res.status(404).json({ error: 'Receta no encontrada' });
+            if (!receta) {
+                console.log(`[VALIDAR] Receta no encontrada: ${recetaId}`);
+                return res.status(404).json({ error: 'Receta no encontrada' });
+            }
+
+            console.log(`[VALIDAR] Receta encontrada. archivoPDF: ${receta.archivoPDF}`);
 
             if (!receta.archivoPDF) {
                 return res.status(400).json({ error: 'La receta no tiene archivo PDF asociado.' });
             }
 
+            // Extraer la clave del archivo desde la URL
+            const key = receta.archivoPDF.includes('amazonaws.com/') 
+                ? receta.archivoPDF.split('amazonaws.com/')[1]
+                : receta.archivoPDF;
+
+            console.log(`[VALIDAR] Clave extraída del S3: ${key}`);
+
             // Descargar el PDF desde S3
             const bucket = process.env.AWS_S3_BUCKET || process.env.BUCKET_NAME;
-            const params = { Bucket: bucket, Key: receta.archivoPDF };
-            const pdfBuffer = (await axios.get(await s3.getSignedUrlPromise('getObject', params), { responseType: 'arraybuffer' })).data;
+            console.log(`[VALIDAR] Descargando desde bucket: ${bucket}, key: ${key}`);
+            
+            const params = { Bucket: bucket, Key: key };
+            const s3Object = await s3.getObject(params).promise();
+            const pdfBuffer = s3Object.Body;
+            
+            console.log(`[VALIDAR] PDF descargado correctamente. Tamaño: ${pdfBuffer.length} bytes`);
 
             // Extraer los campos desde el PDF usando Textract
+            console.log(`[VALIDAR] Iniciando extracción con Textract...`);
             const { pacienteDNI, medicoCMP, fechaEmision, productos } = await extraerCamposDesdePDF(pdfBuffer, textract);
+
+            console.log(`[VALIDAR] Datos extraídos - DNI: ${pacienteDNI}, CMP: ${medicoCMP}, Fecha: ${fechaEmision}, Productos: ${productos.length}`);
 
             // Validar los campos extraídos
             if (
@@ -196,6 +217,7 @@ const recetasService = {
             }
 
             // Validar CMP en la base de datos
+            console.log(`[VALIDAR] Validando CMP: ${medicoCMP}`);
             const medico = await Medico.findOne({ cmp: medicoCMP, colegiaturaValida: true });
             if (!medico) {
                 return res.status(400).json({ error: 'CMP no registrado o colegiatura no válida' });
@@ -215,6 +237,7 @@ const recetasService = {
             }
 
             // Actualiza la receta en la base de datos con los datos extraídos y estado validada
+            console.log(`[VALIDAR] Actualizando receta a estado 'validada'`);
             const recetaActualizada = await Receta.findByIdAndUpdate(
                 recetaId,
                 {
@@ -227,9 +250,16 @@ const recetasService = {
                 { new: true, runValidators: true }
             );
 
+            console.log(`[VALIDAR] Validación completada exitosamente para receta ID: ${recetaId}`);
             res.json({ mensaje: 'Receta validada y actualizada correctamente', receta: recetaActualizada });
         } catch (error) {
-            res.status(500).json({ error: 'Error al validar la receta', detalle: error.message });
+            console.error('[ERROR] validarRecetaPorId:', error);
+            console.error('[ERROR] Stack:', error.stack);
+            res.status(500).json({ 
+                error: 'Error al validar la receta', 
+                detalle: error.message,
+                codigo: error.code || 'UNKNOWN'
+            });
         }
     },
 
@@ -283,7 +313,11 @@ const recetasService = {
 
             let pdfUrl = null;
             if (receta.archivoPDF) {
-                const key = receta.archivoPDF;
+                // Extraer la clave del archivo desde la URL
+                const key = receta.archivoPDF.includes('amazonaws.com/') 
+                    ? receta.archivoPDF.split('amazonaws.com/')[1]
+                    : receta.archivoPDF;
+                    
                 const bucket = process.env.AWS_S3_BUCKET || process.env.BUCKET_NAME;
                 if (bucket) {
                     const params = {
@@ -299,9 +333,11 @@ const recetasService = {
                 pdfUrl
             });
         } catch (error) {
+            console.error('[ERROR] obtenerRecetaPorId:', error);
             res.status(500).json({ error: 'Error al obtener la receta', detalle: error.message });
         }
     },
+
 };
 
 module.exports = recetasService;
